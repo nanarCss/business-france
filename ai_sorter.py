@@ -6,36 +6,41 @@ import google.generativeai as genai
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
 PROFIL_CANDIDAT = """
-Je suis un ingénieur DevOps / Cloud / SRE avec une forte appétence pour la Data.
+Je suis un ingénieur systèmes Linux / DevOps / Cloud / SRE avec une forte appétence pour la Data.
 
 COMPÉTENCES PRINCIPALES :
+- Systèmes Linux : administration, hardening, troubleshooting, scripting, gestion de parcs serveurs
 - DevOps & SRE : CI/CD (GitLab CI, GitHub Actions, Jenkins), Infrastructure as Code (Terraform, Ansible, Pulumi)
-- Containers & Orchestration : Kubernetes, Docker, Helm, ArgoCD, FluxCD
-- Cloud : AWS, GCP, Azure (certifié ou en cours)
-- Monitoring & Observabilité : Prometheus, Grafana, Datadog, ELK Stack, Loki
+- Containers & Orchestration : Docker, Kubernetes (notions), Helm
+- Cloud : AWS, GCP, Azure (notions et pratique)
+- Monitoring & Observabilité : Prometheus, Grafana, Datadog, ELK Stack, Nagios, Zabbix
 - Scripting & Automation : Python, Bash, Go
+- Réseau : TCP/IP, DNS, DHCP, firewalls, VPN, reverse proxy (Nginx, HAProxy)
 - Data Engineering : pipelines de données, ETL, SQL, Kafka, Spark (niveau intermédiaire)
-- Systèmes : Linux, réseau, sécurité infrastructure
 
 POSTES RECHERCHÉS (par ordre de préférence) :
-1. DevOps Engineer / SRE / Platform Engineer
-2. Cloud Engineer / Infrastructure Engineer
-3. Data Engineer avec composante DevOps/Cloud
-4. MLOps Engineer
-5. IT Finance / DevOps dans la finance de marché
+1. Administrateur Systèmes Linux / Ingénieur Systèmes
+2. DevOps Engineer / SRE / Platform Engineer
+3. Cloud Engineer / Infrastructure Engineer
+4. Ingénieur Infrastructure / Infra & Ops
+5. Data Engineer avec composante DevOps/Cloud
+6. MLOps Engineer
+7. IT Finance / DevOps dans la finance de marché
 
 CE QUE J'AIME :
 - Missions avec de la responsabilité technique
-- Environnements Cloud-native et microservices
+- Environnements Linux (Debian, Ubuntu, RHEL, CentOS...)
 - Automatisation et amélioration continue
+- Administration et exploitation d'infrastructure
+- Environnements Cloud ou hybrides
 - Grandes entreprises ou scale-ups avec de vraies infras
 - Bonne rémunération VIE et grandes villes en Asie
 
 CE QUE JE N'AIME PAS :
 - Support utilisateur / helpdesk / N1-N2
 - Postes purement fonctionnels ou commerciaux
-- Missions trop orientées "maintenance legacy" sans modernisation
-- Petites structures sans infra cloud
+- Postes 100% Windows sans composante Linux
+- Missions sans aucune composante technique
 """
 
 def trier_offres_ia(offres):

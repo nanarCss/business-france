@@ -67,10 +67,25 @@ CRITERES = {
         
         # ===== SYSTÈMES & RÉSEAU =====
         'systems engineer', 'ingénieur système', 'ingénieur systèmes',
-        'system administrator', 'administrateur système',
-        'linux', 'unix', 'network engineer', 'ingénieur réseau',
+        'system administrator', 'administrateur système', 'administrateur systèmes',
+        'admin système', 'admin sys', 'admin linux',
+        'linux', 'unix', 'rhel', 'red hat', 'debian', 'ubuntu', 'centos',
+        'network engineer', 'ingénieur réseau',
         'automation', 'automatisation', 'infrastructure',
-        'réseau', 'network', 'virtualisation', 'vmware',
+        'réseau', 'network', 'virtualisation', 'vmware', 'proxmox',
+        'serveur', 'server', 'hébergement', 'hosting',
+        'firewall', 'pare-feu', 'dns', 'dhcp', 'ldap', 'active directory',
+        'nginx', 'apache', 'haproxy', 'reverse proxy', 'load balancer',
+        'stockage', 'storage', 'backup', 'sauvegarde', 'raid',
+        'tcp/ip', 'vpn', 'ssh', 'ssl', 'tls',
+        
+        # ===== ADMIN SYS / OPS / EXPLOITATION =====
+        'sysadmin', 'sysops', 'ops engineer',
+        'exploitation', 'production', 'run', 'mco',
+        'ingénieur exploitation', 'ingénieur production',
+        'support n3', 'support niveau 3',
+        'gestion de parc', 'asset management',
+        'itil', 'itsm',
         
         # ===== SÉCURITÉ =====
         'cybersecurity', 'cybersécurité', 'security engineer',
