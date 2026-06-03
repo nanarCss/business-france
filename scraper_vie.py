@@ -229,7 +229,7 @@ def scraper_offres_vie():
         browser = p.chromium.launch(headless=headless)
         page = browser.new_page()
         # page.goto('https://mon-vie-via.businessfrance.fr/offres/recherche?latest=true', timeout=60000)
-        page.goto('https://mon-vie-via.businessfrance.fr/offres/recherche?query&specializationsIds=212&specializationsIds=24&missionsTypesIds=VIE&teletravail=0&porteEnv=0', timeout=60000)
+        page.goto('https://mon-vie-via.businessfrance.fr/offres/recherche?query&specializationsIds=243&specializationsIds=190&specializationsIds=36&specializationsIds=193&specializationsIds=89&specializationsIds=196&specializationsIds=214&specializationsIds=19&specializationsIds=58&specializationsIds=210&specializationsIds=212&specializationsIds=216&specializationsIds=59&specializationsIds=227&specializationsIds=100&specializationsIds=81&specializationsIds=239&specializationsIds=255&specializationsIds=24&geographicZones=4&teletravail=0&porteEnv=0', timeout=60000)
         time.sleep(5)
         
         # Fermer popup cookies
