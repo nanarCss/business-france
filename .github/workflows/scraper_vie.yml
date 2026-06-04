@@ -3,9 +3,13 @@ name: Scraper VIE (daily)
 on:
     workflow_dispatch:
     schedule:
-        # Cible ~07:00 Paris (CEST). GitHub free tier ajoute ~3h30 de délai.
-        # 01:30 UTC + ~3h30 délai ≈ 05:00 UTC = 07:00 CEST
-        - cron: "30 1 * * *"
+        # Premier déclenchement : Cible ~07:30 Paris (CEST)
+        # 02:00 UTC + ~3h30 de délai de planification ≈ 05:30 UTC (07:30 CEST)
+        - cron: "00 2 * * *"
+
+        # Deuxième déclenchement : Cible ~17:30 Paris (CEST)
+        # 12:00 UTC + ~3h30 de délai de planification ≈ 15:30 UTC (17:30 CEST)
+        - cron: "00 12 * * *"
 
 jobs:
     run-scraper:
