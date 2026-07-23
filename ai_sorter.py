@@ -2,6 +2,7 @@
 import os
 import json
 import time
+import re
 import google.generativeai as genai
 
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
@@ -101,8 +102,10 @@ def trier_offres_ia(offres):
                 error_msg = str(e)
                 if "429" in error_msg or "Quota" in error_msg:
                     if attempt < max_retries - 1:
-                        print(f"⚠️ Quota Gemini atteint. Attente de 60 secondes avant réessai ({attempt + 1}/{max_retries})...")
-                        time.sleep(60)
+                        match = re.search(r"seconds:\s*(\d+)", error_msg)
+                        wait = int(match.group(1)) + 2 if match else 60
+                        print(f"⚠️ Quota Gemini atteint. Attente de {wait}s avant réessai ({attempt + 1}/{max_retries})...")
+                        time.sleep(wait)
                     else:
                         raise e
                 else:
