@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import json
+import time
 import google.generativeai as genai
 
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
@@ -90,7 +91,23 @@ def trier_offres_ia(offres):
         {offres_text}
         """
         
-        response = model.generate_content(prompt)
+        max_retries = 3
+        response = None
+        for attempt in range(max_retries):
+            try:
+                response = model.generate_content(prompt)
+                break
+            except Exception as e:
+                error_msg = str(e)
+                if "429" in error_msg or "Quota" in error_msg:
+                    if attempt < max_retries - 1:
+                        print(f"⚠️ Quota Gemini atteint. Attente de 60 secondes avant réessai ({attempt + 1}/{max_retries})...")
+                        time.sleep(60)
+                    else:
+                        raise e
+                else:
+                    raise e
+                    
         text_resp = response.text.strip()
         
         # Nettoyage si l'IA met du markdown
