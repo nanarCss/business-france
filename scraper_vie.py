@@ -122,6 +122,18 @@ PAYS_ASIE = [
     'myanmar', 'birmanie',
 ]
 
+DEFAULT_SEARCH_URL = (
+    'https://mon-vie-via.businessfrance.fr/offres/recherche?'
+    'query&specializationsIds=243&specializationsIds=190&specializationsIds=36&'
+    'specializationsIds=193&specializationsIds=89&specializationsIds=196&'
+    'specializationsIds=214&specializationsIds=19&specializationsIds=58&'
+    'specializationsIds=210&specializationsIds=212&specializationsIds=216&'
+    'specializationsIds=59&specializationsIds=227&specializationsIds=100&'
+    'specializationsIds=81&specializationsIds=239&specializationsIds=255&'
+    'specializationsIds=24&geographicZones=4&teletravail=0&porteEnv=0'
+)
+SEARCH_URL = os.getenv('SEARCH_URL', DEFAULT_SEARCH_URL)
+
 
 def _env(name, default):
     value = os.getenv(name)
@@ -226,43 +238,103 @@ def scraper_offres_vie():
     
     with sync_playwright() as p:
         headless = os.getenv('HEADLESS', 'true').lower() not in {'0', 'false', 'no'}
-        browser = p.chromium.launch(headless=headless)
-        page = browser.new_page()
-        # page.goto('https://mon-vie-via.businessfrance.fr/offres/recherche?latest=true', timeout=60000)
-        page.goto('https://mon-vie-via.businessfrance.fr/offres/recherche?query&specializationsIds=243&specializationsIds=190&specializationsIds=36&specializationsIds=193&specializationsIds=89&specializationsIds=196&specializationsIds=214&specializationsIds=19&specializationsIds=58&specializationsIds=210&specializationsIds=212&specializationsIds=216&specializationsIds=59&specializationsIds=227&specializationsIds=100&specializationsIds=81&specializationsIds=239&specializationsIds=255&specializationsIds=24&geographicZones=4&teletravail=0&porteEnv=0', timeout=60000)
-        time.sleep(5)
+        browser = p.chromium.launch(
+            headless=headless,
+            args=[
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+            ]
+        )
+        context = browser.new_context(
+            user_agent=(
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+            ),
+            locale='fr-FR',
+            viewport={'width': 1920, 'height': 1080}
+        )
+        page = context.new_page()
         
-        # Fermer popup cookies
+        # Navigation avec retry et wait_until='domcontentloaded'
+        max_nav_retries = 3
+        for attempt in range(1, max_nav_retries + 1):
+            try:
+                print(f"🌐 Navigation vers le catalogue VIE (tentative {attempt}/{max_nav_retries})...")
+                page.goto(SEARCH_URL, wait_until='domcontentloaded', timeout=90000)
+                break
+            except Exception as e:
+                print(f"⚠️ Erreur de chargement (tentative {attempt}/{max_nav_retries}) : {e}")
+                if attempt < max_nav_retries:
+                    time.sleep(5)
+                else:
+                    raise
+
+        # Fermer popup cookies Didomi si présent
         try:
-            page.query_selector('button#didomi-notice-agree-button').click()
-            time.sleep(2)
-        except:
+            page.wait_for_selector('button#didomi-notice-agree-button', timeout=5000)
+            cookie_btn = page.query_selector('button#didomi-notice-agree-button')
+            if cookie_btn and cookie_btn.is_visible():
+                cookie_btn.click()
+                print("🍪 Cookies acceptés")
+                time.sleep(1)
+        except Exception:
             pass
-        
-        # Nombre total
+
+        # Attendre que les résultats soient présents dans le DOM
         try:
-            total = int(''.join(filter(str.isdigit, page.query_selector('.count').inner_text())))
-            print(f"🎯 Total : {total} offres")
-        except:
+            page.wait_for_selector('.figure_container, .count', state='attached', timeout=20000)
+        except Exception:
+            pass
+        time.sleep(2)
+        
+        # Nombre total d'offres
+        try:
+            count_el = page.query_selector('.count')
+            if count_el:
+                digits = ''.join(filter(str.isdigit, count_el.inner_text()))
+                total = int(digits) if digits else 9999
+            else:
+                total = 9999
+            print(f"🎯 Total : {total} offres annoncées")
+        except Exception as e:
+            print(f"⚠️ Impossible de lire le total ({e}), utilisation de la valeur par défaut")
             total = 9999
         
+        # Pagination dynamique avec détection de stagnation
+        prev_count = 0
+        stagnant_retries = 0
+        max_stagnant = 3
+
         while True:
             elements = page.query_selector_all('.figure_container')
-            print(f"📊 Chargées : {len(elements)}/{total}")
+            count_loaded = len(elements)
+            print(f"📊 Chargées : {count_loaded}/{total}")
             
-            if len(elements) >= total:
+            if count_loaded >= total:
                 break
             
+            if count_loaded == prev_count:
+                stagnant_retries += 1
+                if stagnant_retries >= max_stagnant:
+                    print("ℹ️ Aucun nouvel élément après plusieurs tentatives, pagination terminée.")
+                    break
+            else:
+                stagnant_retries = 0
+                prev_count = count_loaded
+
             try:
                 btn = page.query_selector('a.btn_bleu_vert.see-more-btn')
                 if btn and btn.is_visible():
                     btn.scroll_into_view_if_needed()
-                    time.sleep(1)
+                    time.sleep(0.5)
                     btn.click(force=True)
-                    time.sleep(1)
+                    time.sleep(1.5)
                 else:
                     break
-            except:
+            except Exception as e:
+                print(f"⚠️ Fin du chargement des offres : {e}")
                 break
         
         # Extraire
@@ -313,9 +385,10 @@ def scraper_offres_vie():
                     'url': url,
                     'date': datetime.now().strftime('%Y-%m-%d')
                 })
-            except:
+            except Exception:
                 continue
         
+        context.close()
         browser.close()
         return offres
 

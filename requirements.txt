@@ -1,2 +1,2 @@
 playwright==1.48.0
-google-generativeai
+google-genai

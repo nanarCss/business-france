@@ -3,7 +3,17 @@ import os
 import json
 import time
 import re
-import google.generativeai as genai
+import warnings
+
+# Prise en charge du SDK moderne google-genai avec rétrocompatibilité google-generativeai
+try:
+    from google import genai
+    USE_GENAI_SDK = True
+except ImportError:
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=FutureWarning)
+        import google.generativeai as genai
+    USE_GENAI_SDK = False
 
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
@@ -57,8 +67,12 @@ def trier_offres_ia(offres):
     print(f"🤖 Analyse IA de {len(offres)} offre(s)...")
     
     try:
-        genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel('gemini-3-flash-preview')
+        model_name = os.getenv('GEMINI_MODEL', 'gemini-2.0-flash')
+        if USE_GENAI_SDK:
+            client = genai.Client(api_key=GEMINI_API_KEY)
+        else:
+            genai.configure(api_key=GEMINI_API_KEY)
+            model = genai.GenerativeModel(model_name)
         
         # Préparer le prompt
         offres_text = ""
@@ -96,7 +110,13 @@ def trier_offres_ia(offres):
         response = None
         for attempt in range(max_retries):
             try:
-                response = model.generate_content(prompt)
+                if USE_GENAI_SDK:
+                    response = client.models.generate_content(
+                        model=model_name,
+                        contents=prompt
+                    )
+                else:
+                    response = model.generate_content(prompt)
                 break
             except Exception as e:
                 error_msg = str(e)
